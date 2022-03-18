@@ -1,0 +1,23 @@
+{
+    "name": "Facebook video downloader",
+    "description": "Facebook video downloader wow!",
+    "version": "1.0",
+    "manifest_version": 3,
+    "background": {
+        "service_worker": "background.js"
+    },
+    "permissions": [
+        "activeTab"
+    ],
+    "content_scripts": [
+        {
+            "run_at": "document_idle",
+            "matches": [
+                "https://*.facebook.com/*"
+            ],
+            "js": [
+                "facebook-cs.js"
+            ]
+        }
+    ]
+}
