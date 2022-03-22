@@ -1,34 +1,58 @@
 import "arrive";
 
-const handler = () => {
-  const FEED_SELECTOR = "div[role='feed'] > div";
-  const MENU_SELECTOR = "div[aria-haspopup='menu']";
+class MobileHandler {
+  constructor() {
+    console.log("mobile handler ready");
+  }
 
-  const onDownloadClick = (videoElement) => {
-    console.log(videoElement);
-  };
+  handleDownload(inlineVideo) {
+    const elementStore = inlineVideo.dataset.store;
+    const storeObject = JSON.parse(elementStore);
+    if (storeObject.type === "video") {
+      const { type, src } = storeObject;
+      const videoURL = new URL(src);
+      console.log(videoURL);
 
-  const init = () => {
-    document.arrive(`${FEED_SELECTOR}`, (element) => {
-      element.arrive("video", (videoElement) => {
-        const descriptionElement = element.querySelector("div[dir='auto']");
-        if (descriptionElement) {
-          const buttonElement = document.createElement("button");
-          buttonElement.textContent = "Download";
-          buttonElement.addEventListener("click", () =>
-            onDownloadClick(videoElement)
-          );
+      fetch(videoURL.href)
+        .then((r) => r.blob())
+        .then((blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement("a");
 
-          descriptionElement.prepend(buttonElement);
-        }
-      });
-    });
-  };
+          link.style.display = "none";
+          link.href = url;
+          link.download = "video.mp4";
 
-  return {
-    init,
-  };
-};
+          document.body.appendChild(link);
+          link.click();
+          window.URL.revokeObjectURL(url);
+        });
+    }
+  }
 
-const facebookContentScript = handler();
-facebookContentScript.init();
+  init() {
+    document.arrive(
+      "div.story_body_container",
+      {
+        existing: true,
+        onceOnly: true,
+      },
+      (root) => {
+        console.log(root);
+        root.arrive(
+          "div[data-sigil='inlineVideo']",
+          {
+            existing: true,
+            onceOnly: true,
+          },
+          (element) => {
+            this.handleDownload(element);
+          }
+        );
+      }
+    );
+  }
+}
+
+const mh = new MobileHandler();
+mh.init();

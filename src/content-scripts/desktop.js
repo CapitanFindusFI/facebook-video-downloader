@@ -1,53 +1,78 @@
 import "arrive";
+import { OPEN_VIDEO_TAB } from "../actions";
 
-const handler = () => {
-  const FEED_SELECTOR = "div[role='feed'] > div";
-  const ARTICLE_SELECTOR = "div[role='article']";
+const FEED_SELECTOR = "div[role='feed'] > div";
+const ARTICLE_SELECTOR = "div[role='article']";
 
-  const onDownloadClick = (port, videoElement) => {
-    console.log(port, videoElement);
-  };
+class DesktopHandler {
+  constructor() {
+    this.port = null;
+  }
 
-  const onPortConnected = (port) => {
-    document.arrive(`${FEED_SELECTOR}`, (element) => {
-      element.arrive("video", (videoElement) => {
-        console.log(videoElement);
+  addDownloadButton(link) {
+    const root = link.closest("div");
+    if (root && !root.querySelector("button")) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.innerText = "Download";
 
-        const articleRoot = element.querySelector(ARTICLE_SELECTOR);
+      const eventBinding = () => {
+        this.port.postMessage({
+          type: OPEN_VIDEO_TAB,
+          data: {
+            url: link.getAttribute("href"),
+          },
+        });
+      };
+      button.removeEventListener("click", eventBinding);
+      button.addEventListener("click", eventBinding);
 
-        if (articleRoot) {
-          console.log(articleRoot);
+      root.append(button);
+    }
+  }
 
-          const ariaDescribedBy = articleRoot.getAttribute("aria-describedby");
-          const ariaLabelledBy = articleRoot.getAttribute("aria-labelledby");
+  handlePostLink(event) {
+    const { target } = event;
+    this.addDownloadButton(target);
+    // const linkHref = link.getAttribute("href");
+  }
 
-          const describedBy = ariaDescribedBy.split(" ");
-          const postLinkRoot = articleRoot.querySelector(`#${describedBy[0]}`);
+  handleFeedElement(article) {
+    const ariaDescribedBy = article.getAttribute("aria-describedby");
 
-          if (postLinkRoot) {
-            const postLinkEl = postLinkRoot.querySelector("a");
-            const postLink = postLinkEl.getAttribute("href");
-            console.log(postLink);
+    const describedBy = ariaDescribedBy.split(" ");
+    const postLinkRoot = article.querySelector(`#${describedBy[0]}`);
+
+    if (postLinkRoot) {
+      const eventBind = this.handlePostLink.bind(this);
+      postLinkRoot.arrive(
+        "a",
+        {
+          fireOnAttributesModification: true,
+        },
+        (link) => {
+          const href = link.getAttribute("href");
+          if (href !== "#") {
+            link.removeEventListener("mouseenter", eventBind);
+            link.addEventListener("mouseenter", eventBind);
+
+            postLinkRoot.unbindArrive("a");
           }
         }
+      );
+    }
+  }
 
-        /*
-        const descriptionElement = element.querySelector("div[dir='auto']");
-        if (descriptionElement) {
-          const buttonElement = document.createElement("button");
-          buttonElement.textContent = "Download";
-          buttonElement.addEventListener("click", () =>
-            onDownloadClick(port, videoElement)
-          );
-
-          descriptionElement.prepend(buttonElement);
-        }
-        */
+  handleFeed() {
+    document.arrive(FEED_SELECTOR, (post) => {
+      post.arrive("video", () => {
+        const articleRoot = post.querySelector(ARTICLE_SELECTOR);
+        if (articleRoot) this.handleFeedElement(articleRoot);
       });
     });
-  };
+  }
 
-  const init = () => {
+  init() {
     const port = chrome.runtime.connect({
       name: "fb-video-downloader",
     });
@@ -56,13 +81,11 @@ const handler = () => {
       throw new Error(chrome.lastError);
     }
 
-    onPortConnected(port);
-  };
+    this.port = port;
 
-  return {
-    init,
-  };
-};
+    this.handleFeed();
+  }
+}
 
-const facebookContentScript = handler();
-facebookContentScript.init();
+const desktopHandler = new DesktopHandler();
+desktopHandler.init();
