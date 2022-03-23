@@ -1,5 +1,5 @@
 import "arrive";
-import { OPEN_VIDEO_TAB } from "../actions";
+import { EXTENSION_PREFIX, OPEN_VIDEO_TAB_ACTION } from "../constants";
 
 const FEED_SELECTOR = "div[role='feed'] > div";
 const ARTICLE_SELECTOR = "div[role='article']";
@@ -15,10 +15,12 @@ class DesktopHandler {
       const button = document.createElement("button");
       button.type = "button";
       button.innerText = "Download";
+      button.className = `${EXTENSION_PREFIX}-button`
+      button.disabled = true
 
       const eventBinding = () => {
         this.port.postMessage({
-          type: OPEN_VIDEO_TAB,
+          type: OPEN_VIDEO_TAB_ACTION,
           data: {
             url: link.getAttribute("href"),
           },
@@ -33,8 +35,13 @@ class DesktopHandler {
 
   handlePostLink(event) {
     const { target } = event;
-    this.addDownloadButton(target);
-    // const linkHref = link.getAttribute("href");
+    const root = target.closest("div");
+    if (root) {
+      const downloadButton = root.querySelector(`.${EXTENSION_PREFIX}-button`)
+      if (downloadButton.getAttribute('disabled') === true) {
+        downloadButton.disabled = false;
+      }
+    }
   }
 
   handleFeedElement(article) {
@@ -44,6 +51,8 @@ class DesktopHandler {
     const postLinkRoot = article.querySelector(`#${describedBy[0]}`);
 
     if (postLinkRoot) {
+      this.addDownloadButton(postLinkRoot);
+
       const eventBind = this.handlePostLink.bind(this);
       postLinkRoot.arrive(
         "a",

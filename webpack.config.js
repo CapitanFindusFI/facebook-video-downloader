@@ -17,6 +17,21 @@ module.exports = {
       "mobile.js"
     ),
   },
+  resolve: {
+    extensions: [".tsx", ".ts", ".js"],
+  },
+  module: {
+    rules: [
+      {
+        test: /\.tsx?$/,
+        loader: "ts-loader",
+        options: {
+          transpileOnly: true,
+        },
+        exclude: /node_modules/,
+      },
+    ],
+  },
   output: {
     filename: "[name].js",
     path: path.join(__dirname, "dist"),

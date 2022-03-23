@@ -2,16 +2,14 @@ import "arrive";
 
 class MobileHandler {
   constructor() {
-    console.log("mobile handler ready");
   }
 
   handleDownload(inlineVideo) {
     const elementStore = inlineVideo.dataset.store;
     const storeObject = JSON.parse(elementStore);
     if (storeObject.type === "video") {
-      const { type, src } = storeObject;
+      const { src } = storeObject;
       const videoURL = new URL(src);
-      console.log(videoURL);
 
       fetch(videoURL.href)
         .then((r) => r.blob())

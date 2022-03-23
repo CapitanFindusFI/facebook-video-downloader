@@ -1,4 +1,4 @@
-import { OPEN_VIDEO_TAB } from "../actions";
+import { OPEN_VIDEO_TAB_ACTION } from "../constants";
 
 class BackgroundHandler {
   constructor() {
@@ -19,14 +19,6 @@ class BackgroundHandler {
       })
       .then((tab) => {
         const { id } = tab;
-        // chrome.scripting
-        //   .executeScript({
-        //     target: { tabId: id },
-        //     files: [chrome.runtime.getURL("mobile-content.js")],
-        //   })
-        //   .then((result) => {
-        //     console.log(result);
-        //   });
       });
   }
 
@@ -34,7 +26,7 @@ class BackgroundHandler {
     if (message.type && message.data) {
       const { type, data } = message;
       switch (type) {
-        case OPEN_VIDEO_TAB: {
+        case OPEN_VIDEO_TAB_ACTION: {
           this.onOpenVideoTab(data.url);
           break;
         }

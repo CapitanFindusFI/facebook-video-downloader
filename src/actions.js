@@ -1,1 +1,0 @@
-export const OPEN_VIDEO_TAB = "@video/open"
