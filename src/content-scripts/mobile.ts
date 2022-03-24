@@ -4,28 +4,30 @@ class MobileHandler {
   constructor() {
   }
 
-  handleDownload(inlineVideo) {
+  handleDownload(inlineVideo: HTMLDivElement) {
     const elementStore = inlineVideo.dataset.store;
+    if (!elementStore) return;
+
     const storeObject = JSON.parse(elementStore);
-    if (storeObject.type === "video") {
-      const { src } = storeObject;
-      const videoURL = new URL(src);
+    if (storeObject.type !== "video") return;
 
-      fetch(videoURL.href)
-        .then((r) => r.blob())
-        .then((blob) => {
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement("a");
+    const { src } = storeObject;
+    const videoURL = new URL(src);
 
-          link.style.display = "none";
-          link.href = url;
-          link.download = "video.mp4";
+    fetch(videoURL.href)
+      .then((r) => r.blob())
+      .then((blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
 
-          document.body.appendChild(link);
-          link.click();
-          window.URL.revokeObjectURL(url);
-        });
-    }
+        link.style.display = "none";
+        link.href = url;
+        link.download = "video.mp4";
+
+        document.body.appendChild(link);
+        link.click();
+        window.URL.revokeObjectURL(url);
+      });
   }
 
   init() {
@@ -35,16 +37,16 @@ class MobileHandler {
         existing: true,
         onceOnly: true,
       },
-      (root) => {
-        console.log(root);
+      (root: Element) => {
         root.arrive(
           "div[data-sigil='inlineVideo']",
           {
             existing: true,
             onceOnly: true,
           },
-          (element) => {
-            this.handleDownload(element);
+          (element: Element) => {
+            const _el = element as HTMLDivElement
+            this.handleDownload(_el);
           }
         );
       }

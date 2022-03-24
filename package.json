@@ -11,8 +11,13 @@
     "type": "git",
     "url": "git+https://github.com/CapitanFindusFI/facebook-video-downloader.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "facebook",
+    "video",
+    "typescript",
+    "chrome"
+  ],
+  "author": "CapitanFindusFI <am95.dev@gmail.com>",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/CapitanFindusFI/facebook-video-downloader/issues"
@@ -22,6 +27,8 @@
     "arrive": "^2.4.1"
   },
   "devDependencies": {
+    "@types/arrive": "^2.4.1",
+    "@types/chrome": "0.0.180",
     "ts-loader": "^9.2.8",
     "typescript": "^4.6.2",
     "webpack": "^5.70.0",

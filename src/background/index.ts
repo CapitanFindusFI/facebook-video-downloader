@@ -1,11 +1,14 @@
 import { OPEN_VIDEO_TAB_ACTION } from "../constants";
+import { PortMessage } from "../types";
 
 class BackgroundHandler {
+  private port: chrome.runtime.Port | null;
+
   constructor() {
     this.port = null;
   }
 
-  onOpenVideoTab(videoUrl) {
+  onOpenVideoTab(videoUrl: string) {
     const fullUrl = new URL(videoUrl);
     const { origin, pathname } = fullUrl;
 
@@ -22,7 +25,7 @@ class BackgroundHandler {
       });
   }
 
-  onPortMessage(message) {
+  onPortMessage(message: PortMessage<any>) {
     if (message.type && message.data) {
       const { type, data } = message;
       switch (type) {
@@ -38,11 +41,11 @@ class BackgroundHandler {
     }
   }
 
-  onPortDisconnected(port) {
+  onPortDisconnected(port: chrome.runtime.Port) {
     this.port = null;
   }
 
-  onPortConnected(port) {
+  onPortConnected(port: chrome.runtime.Port) {
     console.log("Port connected");
 
     this.port = port;
